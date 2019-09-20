@@ -1,0 +1,28 @@
+{
+  "name": "react-native-infinite-flatlist-patch",
+  "version": "1.0.0",
+  "description": "Patch for infinite scrolling with FlatList",
+  "keywords": [
+    "react-native",
+    "flatlist",
+    "infinite",
+    "onendreached"
+  ],
+  "main": "patch.js",
+  "author": "ifsnow <ifsnow@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ifsnow/react-native-infinite-flatlist-patch.git"
+  },
+  "bin": {
+    "infinite-flatlist-patch": "patch.js"
+  },
+  "scripts": {
+    "patch": "node patch.js",
+    "postinstall": "yarn run patch"
+  },
+  "devDependencies": {
+    "react-native": ">=0.50.0"
+  }
+}
