@@ -1,3 +1,5 @@
+[![NPM Version][npm-image]][npm-url]
+
 Infinite scrolling is one of the most used UX in App. In React Native, This is implemented using the `onEndReached` props of FlatList.
 
 Unfortunately, It doesn't work well as expected. I think it's one of the headaches that hasn't been solved for quite some time. We had to make it work by modifying `onEndReachedThreshold` several times, but eventually it doesn't work efficiently.
@@ -74,3 +76,6 @@ This app is to test the improvements of `onEndReached` of FlatList.
 ![Patched FlatList scrolling](https://github.com/ifsnow/FlatListImprovementTest/raw/master/screenshots/patched_flatlist_scrolling.png)
 
 `OnEndReached` is called twice when required and FlatList has 30 items.
+
+[npm-image]: https://img.shields.io/npm/v/react-native-infinite-flatlist-patch.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/react-native-infinite-flatlist-patch
