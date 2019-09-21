@@ -14,7 +14,7 @@ const minorVersion = parseInt(version[1], 10);
 const patchVersion = parseInt(version[2], 10);
 
 let patchDir = '';
-if (minorVersion === 60) {
+if (minorVersion >= 60) {
   patchDir = '0.60.5';
 } else if (minorVersion === 59) {
   if (patchVersion >= 8) {
