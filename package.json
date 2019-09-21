@@ -1,6 +1,6 @@
 {
   "name": "react-native-infinite-flatlist-patch",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Patch for infinite scrolling with FlatList",
   "keywords": [
     "react-native",
