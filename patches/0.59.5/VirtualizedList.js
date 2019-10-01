@@ -1018,6 +1018,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
   _totalCellsMeasured = 0;
   _updateCellsToRenderBatcher: Batchinator;
   _viewabilityTuples: Array<ViewabilityHelperCallbackTuple> = [];
+  _hasDoneFirstScroll = false;
 
   _captureScrollRef = ref => {
     this._scrollRef = ref;
@@ -1247,7 +1248,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
     return !this.props.horizontal ? metrics.y : metrics.x;
   }
 
-  _maybeCallOnEndReached() {
+  _maybeCallOnEndReached(hasChangedContentLength: boolean = false) {
     const {onEndReached, onEndReachedThreshold} = this.props;
     if (!onEndReached) {
       return;
@@ -1257,11 +1258,15 @@ class VirtualizedList extends React.PureComponent<Props, State> {
 
     // Scrolled in a direction that doesn't require a check,
     // such as scrolling up in the vertical list
-    if (offset <= 0 || dOffset <= 0) {
+    if (
+      !hasChangedContentLength &&
+      !this._hasDoneFirstScroll &&
+      (offset <= 0 || dOffset <= 0)
+    ) {
       return;
     }
 
-    // contentLength did not change because no new data was added
+    // contentLength did not change because no new data was added (for fast scrolling)
     if (contentLength === this._sentEndForContentLength) {
       return;
     }
@@ -1300,9 +1305,20 @@ class VirtualizedList extends React.PureComponent<Props, State> {
     if (this.props.onContentSizeChange) {
       this.props.onContentSizeChange(width, height);
     }
-    this._scrollMetrics.contentLength = this._selectLength({height, width});
+    const {contentLength: currentContentLength} = this._scrollMetrics;
+    const contentLength = this._selectLength({height, width});
+    this._scrollMetrics.contentLength = contentLength;
     this._scheduleCellsToRenderUpdate();
-    this._maybeCallOnEndReached();
+
+    const hasChangedContentLength =
+      currentContentLength > 0 &&
+      contentLength > 0 &&
+      currentContentLength !== contentLength;
+    if (hasChangedContentLength && this._sentEndForContentLength > 0) {
+      this._sentEndForContentLength = 0;
+    }
+
+    this._maybeCallOnEndReached(hasChangedContentLength);
   };
 
   /* Translates metrics from a scroll event in a parent VirtualizedList into
@@ -1389,6 +1405,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
     if (!this.props) {
       return;
     }
+    this._hasDoneFirstScroll = true;
     this._maybeCallOnEndReached();
     if (velocity !== 0) {
       this._fillRateHelper.activate();
