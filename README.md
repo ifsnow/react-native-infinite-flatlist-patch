@@ -49,20 +49,20 @@ Just delete the command you added to `postinstall`, `postuninstall` and remove m
 
 This app is to test the improvements of `onEndReached` of FlatList.
 
-- The list has 10 items at the beginning.
+- The list has 20 items at the beginning.
 - When `onEndReached` is called, 10 items are added.
 
 ## After the initial rendering
 #### # Official FlatList
 ![Official FlatList initial rendering](https://github.com/ifsnow/FlatListImprovementTest/raw/master/screenshots/old_flatlist_initial_renering.png)
 
-`OnEndReached` is called twice in a short period and FlatList has 30 items.
+`OnEndReached` is called and FlatList has 30 items.
 
 #### # Patched FlatList
 
 ![Patched FlatList initial rendering](https://github.com/ifsnow/FlatListImprovementTest/raw/master/screenshots/patched_flatlist_initial_renering.png)
 
-`OnEndReached` is not called and FlatList has 10 items.
+`OnEndReached` is not called and FlatList has 20 items.
 
 ## After scrolling to the 11th item
 #### # Official FlatList
@@ -75,7 +75,7 @@ This app is to test the improvements of `onEndReached` of FlatList.
 
 ![Patched FlatList scrolling](https://github.com/ifsnow/FlatListImprovementTest/raw/master/screenshots/patched_flatlist_scrolling.png)
 
-`OnEndReached` is called twice when required and FlatList has 30 items.
+`OnEndReached` is called and FlatList has 30 items.
 
 [npm-image]: https://img.shields.io/npm/v/react-native-infinite-flatlist-patch.svg?style=flat-square
 [npm-url]: https://npmjs.org/package/react-native-infinite-flatlist-patch
