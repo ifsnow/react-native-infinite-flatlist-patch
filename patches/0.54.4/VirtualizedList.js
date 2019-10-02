@@ -1157,7 +1157,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
     return !this.props.horizontal ? metrics.y : metrics.x;
   }
 
-  _maybeCallOnEndReached(hasChangedContentLength: boolean = false) {
+  _maybeCallOnEndReached(hasShrinkedContentLength: boolean = false) {
     const {onEndReached, onEndReachedThreshold} = this.props;
     if (!onEndReached) {
       return;
@@ -1165,25 +1165,29 @@ class VirtualizedList extends React.PureComponent<Props, State> {
 
     const {contentLength, visibleLength, offset, dOffset} = this._scrollMetrics;
 
-    // Scrolled in a direction that doesn't require a check,
-    // such as scrolling up in the vertical list
+    // If this is just after the initial rendering
     if (
-      !hasChangedContentLength &&
+      !hasShrinkedContentLength &&
       !this._hasDoneFirstScroll &&
-      (offset <= 0 || dOffset <= 0)
+      offset === 0
     ) {
       return;
     }
 
-    // contentLength did not change because no new data was added (for fast scrolling)
+    // If scrolled up in the vertical list
+    if (dOffset < 0) {
+      return;
+    }
+
+    // If contentLength has not changed
     if (contentLength === this._sentEndForContentLength) {
       return;
     }
 
     const distanceFromEnd = contentLength - visibleLength - offset;
 
-    // If the distance is farther than can be seen on the screen
-    if (distanceFromEnd >= visibleLength) {
+    // If the distance is so farther than the area shown on the screen
+    if (distanceFromEnd >= visibleLength * 1.5) {
       return;
     }
 
@@ -1219,15 +1223,19 @@ class VirtualizedList extends React.PureComponent<Props, State> {
     this._scrollMetrics.contentLength = contentLength;
     this._scheduleCellsToRenderUpdate();
 
-    const hasChangedContentLength =
+    const hasShrinkedContentLength =
       currentContentLength > 0 &&
       contentLength > 0 &&
-      currentContentLength !== contentLength;
-    if (hasChangedContentLength && this._sentEndForContentLength > 0) {
+      contentLength < currentContentLength;
+
+    if (
+      hasShrinkedContentLength &&
+      this._sentEndForContentLength >= contentLength
+    ) {
       this._sentEndForContentLength = 0;
     }
 
-    this._maybeCallOnEndReached(hasChangedContentLength);
+    this._maybeCallOnEndReached(hasShrinkedContentLength);
   };
 
   /* Translates metrics from a scroll event in a parent VirtualizedList into
