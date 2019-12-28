@@ -20,7 +20,7 @@
   },
   "scripts": {
     "patch": "node patch.js",
-    "postinstall": "yarn run patch"
+    "postinstall": "node patch.js"
   },
   "devDependencies": {
     "react-native": ">=0.50.0"
