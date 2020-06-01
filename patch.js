@@ -17,8 +17,10 @@ let patchDir = '';
 switch (minorVersion) {
   case 62:
     patchDir = '0.62.1';
+    break;
   case 61:
     patchDir = '0.61.5';
+    break;
   case 60: 
     patchDir = '0.60.5';
     break;
@@ -44,7 +46,7 @@ switch (minorVersion) {
   case 54:
     patchDir = '0.54.4';
     break;
-  default:    
+  default:
     break;
 }
 
