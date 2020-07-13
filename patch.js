@@ -15,6 +15,9 @@ const patchVersion = parseInt(version[2], 10);
 
 let patchDir = '';
 switch (minorVersion) {
+  case 63:
+    patchDir = '0.63.0';
+    break;
   case 62:
     patchDir = '0.62.1';
     break;
