@@ -1222,6 +1222,7 @@
    _totalCellsMeasured = 0;
    _updateCellsToRenderBatcher: Batchinator;
    _viewabilityTuples: Array<ViewabilityHelperCallbackTuple> = [];
+   _hasDoneFirstScroll = false;
 
    _captureScrollRef = ref => {
      this._scrollRef = ref;
@@ -1500,32 +1501,42 @@
      return !horizontalOrDefault(this.props.horizontal) ? metrics.y : metrics.x;
    }
 
-   _maybeCallOnEndReached() {
-     const {
-       data,
-       getItemCount,
-       onEndReached,
-       onEndReachedThreshold,
-     } = this.props;
-     const {contentLength, visibleLength, offset} = this._scrollMetrics;
-     const distanceFromEnd = contentLength - visibleLength - offset;
-     const threshold =
-       onEndReachedThreshold != null ? onEndReachedThreshold * visibleLength : 2;
+   _maybeCallOnEndReached(hasShrinkedContentLength: boolean = false) {
+    const {onEndReached, onEndReachedThreshold} = this.props;
+    if (!onEndReached) {
+      return;
+    }
+    const {contentLength, visibleLength, offset, dOffset} = this._scrollMetrics;
+    // If this is just after the initial rendering
      if (
-       onEndReached &&
-       this.state.last === getItemCount(data) - 1 &&
-       distanceFromEnd < threshold &&
-       this._scrollMetrics.contentLength !== this._sentEndForContentLength
+      !hasShrinkedContentLength &&
+      !this._hasDoneFirstScroll &&
+      offset === 0
      ) {
-       // Only call onEndReached once for a given content length
-       this._sentEndForContentLength = this._scrollMetrics.contentLength;
-       onEndReached({distanceFromEnd});
-     } else if (distanceFromEnd > threshold) {
-       // If the user scrolls away from the end and back again cause
-       // an onEndReached to be triggered again
-       this._sentEndForContentLength = 0;
-     }
-   }
+      return;
+    }
+    // If scrolled up in the vertical list
+    if (dOffset < 0) {
+      return;
+    }
+    // If contentLength has not changed
+    if (contentLength === this._sentEndForContentLength) {
+      return;
+    }
+    const distanceFromEnd = contentLength - visibleLength - offset;
+    // If the distance is so farther than the area shown on the screen
+    if (distanceFromEnd  visibleLength * 1.5) {
+      return;
+    }
+    // $FlowFixMe
+    const minimumDistanceFromEnd = onEndReachedThreshold * visibleLength;
+    if (distanceFromEnd  minimumDistanceFromEnd) {
+      return;
+    }
+
+    this._sentEndForContentLength = contentLength;
+    onEndReached({distanceFromEnd});
+  }
 
    _onContentSizeChange = (width: number, height: number) => {
      if (
@@ -1546,9 +1557,22 @@
      if (this.props.onContentSizeChange) {
        this.props.onContentSizeChange(width, height);
      }
-     this._scrollMetrics.contentLength = this._selectLength({height, width});
+     const {contentLength: currentContentLength} = this._scrollMetrics;
+     const contentLength = this._selectLength({height, width});
+     this._scrollMetrics.contentLength = contentLength;
      this._scheduleCellsToRenderUpdate();
-     this._maybeCallOnEndReached();
+
+     const hasShrinkedContentLength =
+       currentContentLength > 0 &&
+       contentLength > 0 &&
+       contentLength < currentContentLength;
+     if (
+       hasShrinkedContentLength &&
+       this._sentEndForContentLength >= contentLength
+     ) {
+       this._sentEndForContentLength = 0;
+     }
+     this._maybeCallOnEndReached(hasShrinkedContentLength);
    };
 
    /* Translates metrics from a scroll event in a parent VirtualizedList into
@@ -1636,6 +1660,7 @@
      if (!this.props) {
        return;
      }
+     this._hasDoneFirstScroll = true;
      this._maybeCallOnEndReached();
      if (velocity !== 0) {
        this._fillRateHelper.activate();
