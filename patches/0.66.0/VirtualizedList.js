@@ -20,7 +20,6 @@ const ViewabilityHelper = require('./ViewabilityHelper');
 const flattenStyle = require('../StyleSheet/flattenStyle');
 const infoLog = require('../Utilities/infoLog');
 const invariant = require('invariant');
-import VirtualizedListInjection from './VirtualizedListInjection';
 
 import {
   keyExtractor as defaultKeyExtractor,
@@ -1354,22 +1353,18 @@ class VirtualizedList extends React.PureComponent<Props, State> {
             this._scrollMetrics.visibleLength = scrollMetrics.visibleLength;
             this._scrollMetrics.offset = scrollMetrics.offset;
 
-            if (
-              VirtualizedListInjection?.unstable_enableVirtualizedListRemeasureChildrenIfNeeded
-            ) {
-              // If metrics of the scrollView changed, then we triggered remeasure for child list
-              // to ensure VirtualizedList has the right information.
-              this._cellKeysToChildListKeys.forEach(childListKeys => {
-                if (childListKeys) {
-                  for (let childKey of childListKeys) {
-                    const childList = this._nestedChildLists.get(childKey);
-                    childList &&
-                      childList.ref &&
-                      childList.ref.measureLayoutRelativeToContainingList();
-                  }
+            // If metrics of the scrollView changed, then we triggered remeasure for child list
+            // to ensure VirtualizedList has the right information.
+            this._cellKeysToChildListKeys.forEach(childListKeys => {
+              if (childListKeys) {
+                for (let childKey of childListKeys) {
+                  const childList = this._nestedChildLists.get(childKey);
+                  childList &&
+                    childList.ref &&
+                    childList.ref.measureLayoutRelativeToContainingList();
                 }
-              });
-            }
+              }
+            });
           }
         },
         error => {
@@ -1506,9 +1501,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
     if (!onEndReached) {
       return;
     }
-
     const {contentLength, visibleLength, offset, dOffset} = this._scrollMetrics;
-
     // If this is just after the initial rendering
     if (
       !hasShrunkContentLength &&
@@ -1525,9 +1518,7 @@ class VirtualizedList extends React.PureComponent<Props, State> {
     if (contentLength === this._sentEndForContentLength) {
       return;
     }
-
     const distanceFromEnd = contentLength - visibleLength - offset;
-
     // If the distance is so farther than the area shown on the screen
     if (distanceFromEnd >= visibleLength * 1.5) {
       return;
@@ -1537,7 +1528,6 @@ class VirtualizedList extends React.PureComponent<Props, State> {
     if (distanceFromEnd >= minimumDistanceFromEnd) {
       return;
     }
-
     this._sentEndForContentLength = contentLength;
     onEndReached({distanceFromEnd});
   }
@@ -1565,7 +1555,6 @@ class VirtualizedList extends React.PureComponent<Props, State> {
     const contentLength = this._selectLength({height, width});
     this._scrollMetrics.contentLength = contentLength;
     this._scheduleCellsToRenderUpdate();
-
     const hasShrunkContentLength =
       currentContentLength > 0 &&
       contentLength > 0 &&
@@ -1929,7 +1918,9 @@ class VirtualizedList extends React.PureComponent<Props, State> {
 
 type CellRendererProps = {
   CellRendererComponent?: ?React.ComponentType<any>,
-  ItemSeparatorComponent: ?React.ComponentType<*>,
+  ItemSeparatorComponent: ?React.ComponentType<
+    any | {highlighted: boolean, leadingItem: ?Item},
+  >,
   cellKey: string,
   fillRateHelper: FillRateHelper,
   horizontal: ?boolean,

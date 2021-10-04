@@ -17,21 +17,20 @@ Once installed, react-native's FlatList is automatically patched.
 yarn add react-native-infinite-flatlist-patch --dev
 ```
 
-`postinstall`, `postuninstall` should be added to prevent this patch from being restored whenever packages are changed.
+`prepare` should be added to prevent this patch from being restored whenever packages are changed.
 ```javascript
 {
   ...
   "scripts": {
     ...,
-    "postinstall": "yarn run infinite-flatlist-patch",
-    "postuninstall": "yarn run infinite-flatlist-patch"
+    "prepare": "yarn run infinite-flatlist-patch"
   }
 }
 ```
 
-If you were already using `postinstall`, you can add the patch script later.
+If you were already using `prepare`, you can add the patch script later.
 ```javascript
-"postinstall": "yarn run jetify; yarn run infinite-flatlist-patch"
+"prepare": "yarn run jetify; yarn run infinite-flatlist-patch"
 ```
 
 ### Execute manually
@@ -41,7 +40,7 @@ yarn run infinite-flatlist-patch
 ```
 
 ### Uninstall
-Just delete the command you added to `postinstall`, `postuninstall` and remove my package.
+Just delete the command you added to `prepare` and remove my package.
 
 # Check out the improvements
 
